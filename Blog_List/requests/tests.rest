@@ -1,0 +1,30 @@
+GET http://localhost:3003/api/blogs
+###
+
+POST http://localhost:3003/api/blogs
+content-type: application/json
+
+{
+        "title": "Harry Potter y la cámara secreta",
+        "author": "Rowling, J. K.",
+        "url": "https://www.crisol.com.pe/catalogsearch/result/?q=+Harry+Potter+y+la+c%C3%A1mara+secreta",
+        "likes": 3
+}
+###
+
+POST http://localhost:3003/api/blogs
+content-type: application/json
+
+{
+        "title": "Harry Potter y la piedra filosofal",
+        "author": "Rowling, J. K.",
+        "url": "https://www.crisol.com.pe/catalogsearch/result/?q=+Harry+potter+y+la+piedra+filosofal",
+        "likes": 2
+}
+###
+
+DELETE http://localhost:3003/api/blogs/2
+###
+
+GET http://localhost:3003/api/blogs/1
+###

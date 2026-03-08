@@ -1,0 +1,24 @@
+{
+  "name": "blog_list",
+  "version": "1.0.0",
+  "description": "Excercises of part 4, the student is Rafael Burgos.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "node --test"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "blog_list": "file:",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^5.2.1",
+    "lodash": "^4.17.23",
+    "mongoose": "^9.2.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
