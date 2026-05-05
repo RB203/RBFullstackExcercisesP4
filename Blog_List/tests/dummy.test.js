@@ -1,6 +1,7 @@
 const { test, describe } = require('node:test')
 const assert = require('node:assert')
 const listHelper = require('../utils/list_helper')
+const app = require('../app')
 
 test('dummy returns one', () => {
   const blogs = []
@@ -37,6 +38,12 @@ describe('total likes', () => {
       __v: 0
     }
   ]
+
+  test('blog with most likes', () => {
+    const result = listHelper.totalLikes(listOfBlogs)
+    assert.strictEqual(result, 15)
+  })
+
 
   test('when list has only one blog, equals the likes of that', () => {
     const result = listHelper.totalLikes(listOfBlogs)
