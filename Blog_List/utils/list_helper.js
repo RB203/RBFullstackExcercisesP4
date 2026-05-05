@@ -2,12 +2,6 @@ const logger = require("./logger")
 const Blog = require("../models/blog")
 const lodash = require("lodash")
 
-
-const blogsInDb = async () => {
-  const blogs = await Blog.find({})
-  return blogs.map(blog => blog.toJSON())
-}
-
 const dummy = (blogs) => {
     blogs.forEach(element => {
         logger.info(element)
@@ -80,5 +74,5 @@ const mostLikes = (blogs) => {
 }
 
 module.exports = {
-    dummy,totalLikes,favoriteBlog,mostBlogs ,mostLikes,blogsInDb
+    dummy, totalLikes, favoriteBlog, mostBlogs, mostLikes
 }
