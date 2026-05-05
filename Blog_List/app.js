@@ -1,9 +1,10 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const cors = require('cors')
 const { info, error } = require('./utils/logger')
 const { MONGODB_URI,PORT } = require('./utils/config')
-const blogRouter = require('./controllers/notes')
+const blogRouter = require('./controllers/blogs')
 const {unknownEndpoint} = require('./utils/middleware')
 const mongoose = require('mongoose')
 

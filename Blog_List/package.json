@@ -4,15 +4,16 @@
   "description": "Excercises of part 4, the student is Rafael Burgos.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "node --test"
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "test": "cross-env NODE_ENV=test node --test"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "blog_list": "file:",
     "cors": "^2.8.5",
+    "cross-env": "^10.1.0",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
     "lodash": "^4.18.1",
