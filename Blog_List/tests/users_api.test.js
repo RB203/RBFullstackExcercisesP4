@@ -128,11 +128,30 @@ test('adding blog with existing user', async () => {
   console.log(responseBlogs.body)
 })
 
-test('a user can log in', async () => {
+test('a user can log in only with the correct credentials', async () => {
   const login = await api.post('/api/login').send({ username: 'Solidus', password: 'MGS1' }).expect('Content-Type', /application\/json/).expect(401)
   console.log(login.body)
-  const trueLogin = await api.post('/api/login').send({ username: 'Solidus', password: 'MGS2SoL' }).expect(200)
+  const trueLogin = await api.post('/api/login').send({ username: 'Solidus', password: 'MGS2SoL' }).expect('Content-Type', /application\/json/).expect(200)
   console.log(trueLogin.body)
+})
+
+test('a user can log in only with the correct credentials', async () => {
+  const login = await api.post('/api/login').send({ username: 'Solidus', password: 'MGS1' }).expect('Content-Type', /application\/json/).expect(401)
+  console.log(login.body)
+  const trueLogin = await api.post('/api/login').send({ username: 'Solidus', password: 'MGS2SoL' }).expect('Content-Type', /application\/json/).expect(200)
+  console.log(trueLogin.body)
+})
+
+test('only a logged user can add blogs', async () => {
+  const trueLogin = await api.post('/api/login').send({ username: 'Solidus', password: 'MGS2SoL' }).expect('Content-Type', /application\/json/).expect(200)
+  const newBlog = {
+    title: "React patterns",
+    author: "Michael Chan",
+    url: "https://reactpatterns.com/",
+    likes: 7,
+  }
+  const post1 = await api.post('/api/blogs').send(newBlog).set('Authorization', `Bearer ${trueLogin.body.token}`).expect(201)
+  console.log(post1.body)
 })
 
 after(async () => {
