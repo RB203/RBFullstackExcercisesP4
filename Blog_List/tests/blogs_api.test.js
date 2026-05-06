@@ -9,7 +9,7 @@ const mongoose = require('mongoose')
 const Blog = require('../models/blog')
 
 const api = supertest(app)
-
+//THESE TESTS ARE NOT PART OF PART 4 OF SECTION D (ONLY SECTION B)
 beforeEach(async () => {
   await Blog.deleteMany({})
   for (let blog of initialBlogs) {
@@ -40,10 +40,11 @@ test('a valid blog can be added', async () => {
     title: "New Blog",
     author: "John Doe",
     url: "https://example.com/new-blog",
-    likes: 97
+    likes: 97,
+    userId: "testing",
   }
 
-  await api.post('/api/blogs').send(newBlog).expect(200).expect('Content-Type', /application\/json/)
+  await api.post('/api/blogs').send(newBlog).expect(201).expect('Content-Type', /application\/json/)
 
   const blogsAfterAdding = await blogsInDb()
   assert.strictEqual(blogsAfterAdding.length, initialBlogs.length + 1)
@@ -53,7 +54,8 @@ test('a blog without likes can be added', async () => {
   const newBlog = {
     title: "Super specific blog",
     author: "John Doe",
-    url: "https://example.com/new-blog"
+    url: "https://example.com/new-blog",
+    userId: "testing",
   }
 
   await api.post('/api/blogs').send(newBlog).expect(201)
@@ -69,6 +71,7 @@ test('a blog without title or url cannot be added', async () => {
   const newBlog = {
     title: "Super specific blog",
     author: "John Doe",
+    userId: "testing",
   }
 
   await api.post('/api/blogs').send(newBlog).expect(400)

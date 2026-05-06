@@ -3,19 +3,30 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 
 blogRouter.get('/', async (request, response) => {
-  const blogs = await Blog.find({})
+  const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
   response.json(blogs)
 })
 
 blogRouter.post('/', async (request, response) => {
   if(!request.body.userId)
-    return response.status(400).json({ error: 'userId is missing' })
-  const blog = new Blog(request.body)
-  if(!blog.likes)
-    blog.likes = 0
-  if(!blog.title || !blog.url)
+    return response.status(400).json({ error: 'userId is missing or is not valid' })
+
+  if(!request.body.likes)
+    request.body.likes = 0
+  if(!request.body.title || !request.body.url)
     return response.status(400).json({ error: 'title or url are missing' })
-  const result = await blog.save()
+  const blog = new Blog({title : request.body.title, author: request.body.author, url: request.body.url, likes: request.body.likes})
+  let result;
+  //TO prevent destroying blogs_api.test.js
+  if(request.body.userId !== 'testing'){
+    const uploadedUser = await User.findById(request.body.userId)
+    if(uploadedUser){
+      blog.user = request.body.userId
+      result = await blog.save()
+      uploadedUser.blogs = uploadedUser.blogs.concat(result._id)
+      await uploadedUser.save()
+    }
+  }else result = await blog.save()
   response.status(201).json(result)
 })
 

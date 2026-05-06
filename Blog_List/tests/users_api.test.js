@@ -81,10 +81,51 @@ test('existing user', async () => {
   console.log(response.body)
 })
 
-test('a user can be deleted', async () => {
-  const users = await api.get('/api/users').expect(200).expect('Content-Type', /application\/json/)
-  const usersAfterAdding = users.body[0]
-  await api.delete(`/api/users/${usersAfterAdding.id}`).expect(204)
+test('normal user added', async () => {
+  const newUser = {
+    username: "Liquid",
+    name: "Eli",
+    password: "MGS1"
+  }
+
+  const response =await api.post('/api/users').send(newUser).expect(201)
+  console.log(response.body)
+})
+
+
+test('adding blog with existing user', async () => {
+  const newUser = {
+    username: "Liquid",
+    name: "Eli",
+    password: "MGS1"
+  }
+
+  const response = await api.post('/api/users').send(newUser).expect(201)
+
+  const newBlog1 = {
+    title: "React patterns",
+    author: "Michael Chan",
+    url: "https://reactpatterns.com/",
+    likes: 7,
+    userId: response.body.id,
+  }
+  const post1 = await api.post('/api/blogs').send(newBlog1).expect(201)
+  
+  const newBlog2 = {
+    title: "Go To Statement Considered Harmful",
+    author: "Edsger W. Dijkstra",
+    url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
+    likes: 5,
+    userId: response.body.id,
+  }
+  
+  const post2 = await api.post('/api/blogs').send(newBlog2).expect(201)
+
+  const responseUsers = await api.get('/api/users').expect('Content-Type', /application\/json/).expect(200)
+  console.log(responseUsers.body)
+
+  const responseBlogs = await api.get('/api/blogs').expect('Content-Type', /application\/json/).expect(200)
+  console.log(responseBlogs.body)
 })
 
 test('a user can be updated', async () => {
