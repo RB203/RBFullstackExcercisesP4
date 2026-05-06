@@ -2,6 +2,7 @@ const blogRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
+const {userExtractor} = require('../utils/userExtractor')
 
 blogRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
@@ -9,46 +10,20 @@ blogRouter.get('/', async (request, response) => {
 })
 
 
-blogRouter.post('/', async (request, response) => {
-  //TO not destroy the testing trough userId
-  if (!request.body.userId && !request.token)
-    return response.status(400).json({ error: 'userId is missing or is not valid, token is not present either' })
-
+blogRouter.post('/', userExtractor, async (request, response) => {
   if (!request.body.likes)
     request.body.likes = 0
   if (!request.body.title || !request.body.url)
     return response.status(400).json({ error: 'title or url are missing' })
   const blog = new Blog({ title: request.body.title, author: request.body.author, url: request.body.url, likes: request.body.likes })
   let result;
-  //TO prevent destroying blogs_api.test.js
-  if (request.body.userId && request.body.userId === 'testing') {
-    result = await blog.save()
-  }
-  else if (request.body.userId) {
-    const uploadedUser = await User.findById(request.body.userId)
-    if (uploadedUser) {
-      blog.user = request.body.userId
-      result = await blog.save()
-      uploadedUser.blogs = uploadedUser.blogs.concat(result._id)
-      await uploadedUser.save()
-    } 
-    else return response.status(400).json({ error: 'userId is not valid' })
-    //TOKEN VALIDATION
-  } else {
-      const decodedToken = jwt.verify(request.token, process.env.SECRET)
-      if (!decodedToken.id) {
-        return response.status(401).json({ error: 'token invalid' })
-      }
-      const user = await User.findById(decodedToken.id)
 
-      if (!user) {
-        return response.status(400).json({ error: 'UserId missing or not valid' })
-      }
-      blog.user = decodedToken.id
-      result = await blog.save()
-      user.blogs = user.blogs.concat(result._id)
-      await user.save()
-  }
+  const user = request.user
+  blog.user = user.id
+  result = await blog.save()
+  user.blogs = user.blogs.concat(result._id)
+  await user.save()
+  
   return response.status(201).json(result)
 })
 
@@ -68,17 +43,11 @@ blogRouter.get('/:id', async (request, response) => {
 
 })
 
-blogRouter.delete('/:id', async (request, response) => {
+blogRouter.delete('/:id', userExtractor, async (request, response) => {
   const id = request.params.id
-  if(!request.token) return response.status(401).json({ error: 'token missing' })
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
-  }
-  const user = await User.findById(decodedToken.id)
-  if(!user) return response.status(400).json({ error: 'UserId missing or not valid' })
+  const user = request.user
   const blog = await Blog.findById(id)
-  if(decodedToken.id.toString() === blog.user.toString()){    
+  if(user.id.toString() === blog.user.toString()){    
     await Blog.findByIdAndDelete(id)
     user.blogs.pop(id)
     await user.save()
