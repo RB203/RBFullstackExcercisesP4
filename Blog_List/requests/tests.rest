@@ -23,6 +23,29 @@ content-type: application/json
 }
 ###
 
+POST http://localhost:3001/api/users
+content-type: application/json
+
+{
+        "username": "Solidus",
+        "name": "George Sears",
+        "password": "secret"
+}
+###
+
+POST http://localhost:3001/api/users
+content-type: application/json
+
+{
+        "username": "Joker",
+        "name": "Ren Amamiya",
+        "password": "secret"
+}
+###
+GET http://localhost:3001/api/users
+
+###
+
 DELETE http://localhost:3001/api/blogs/2
 ###
 
