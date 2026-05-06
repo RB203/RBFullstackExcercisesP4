@@ -128,13 +128,11 @@ test('adding blog with existing user', async () => {
   console.log(responseBlogs.body)
 })
 
-test('a user can be updated', async () => {
-  const users = await api.get('/api/users').expect(200).expect('Content-Type', /application\/json/)
-  const usersAfterAdding = users.body[0]
-  console.log(usersAfterAdding)
-  const updatedUser = await api.put(`/api/users/${usersAfterAdding.id}`).send({ ...usersAfterAdding, likes: usersAfterAdding.likes + 1 }).expect(200)
-  console.log(updatedUser.body)
-  assert.strictEqual(usersAfterAdding.likes + 1, updatedUser.body.likes)
+test('a user can log in', async () => {
+  const login = await api.post('/api/login').send({ username: 'Solidus', password: 'MGS1' }).expect('Content-Type', /application\/json/).expect(401)
+  console.log(login.body)
+  const trueLogin = await api.post('/api/login').send({ username: 'Solidus', password: 'MGS2SoL' }).expect(200)
+  console.log(trueLogin.body)
 })
 
 after(async () => {
