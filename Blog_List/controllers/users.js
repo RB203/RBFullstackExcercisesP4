@@ -9,6 +9,9 @@ userRouter.get('/', async (request, response) => {
 
 userRouter.post('/', async (request, response) => {
     const { username, name, password } = request.body
+    const existingUser = await User.findOne({ username : username })
+    if(existingUser)
+        return response.status(400).json({ error: 'username already existing' })
     if(!username || !password)
         return response.status(400).json({ error: 'username or password are missing' })
     if(username.length < 3 || password.length < 3)

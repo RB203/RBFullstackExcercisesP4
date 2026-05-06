@@ -1,17 +1,16 @@
 const User = require('../models/user')
-const bcrypt = require('bcrypt')
-const saltRounds = 10
+
 
 const initialUsers = [
   {
     username: "Solidus",
     name: "George Sears",
-    password: await bcrypt.hash("MGS2SoL", saltRounds)
+    password: "MGS2SoL",
   },
   {
     username: "Joker",
     name: "Ren Amamiya",
-    password: await bcrypt.hash("SMTP5R", saltRounds)
+    password: "SMTP5R",
   }  
 ]
 
