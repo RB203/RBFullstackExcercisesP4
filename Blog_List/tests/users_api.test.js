@@ -163,8 +163,7 @@ test('a blog can be deleted by a logged user', async () => {
     likes: 7,
   }
   const post1 = await api.post('/api/blogs').send(newBlog).set('Authorization', `Bearer ${trueLogin.body.token}`).expect(201)
-  const finalResult = await api.delete(`/api/blogs/${post1.body.id}`).set('Authorization', `Bearer ${trueLogin.body.token}`)
-  // .expect(204)
+  const finalResult = await api.delete(`/api/blogs/${post1.body.id}`).set('Authorization', `Bearer ${trueLogin.body.token}`).expect(204)
   console.log(finalResult.body)
 })
 
