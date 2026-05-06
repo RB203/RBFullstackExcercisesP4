@@ -122,7 +122,7 @@ test('adding blog with existing user', async () => {
   const post2 = await api.post('/api/blogs').send(newBlog2).expect(201)
 
   const responseUsers = await api.get('/api/users').expect('Content-Type', /application\/json/).expect(200)
-  console.log(responseUsers.body)
+  console.log(JSON.stringify(responseUsers.body))
 
   const responseBlogs = await api.get('/api/blogs').expect('Content-Type', /application\/json/).expect(200)
   console.log(responseBlogs.body)
