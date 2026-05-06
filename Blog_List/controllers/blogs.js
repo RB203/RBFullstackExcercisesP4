@@ -3,15 +3,6 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 
-
-const getTokenFrom = request => {
-  const authorization = request.get('authorization')
-  if (authorization && authorization.startsWith('Bearer ')) {
-    return authorization.replace('Bearer ', '')
-  }
-  return null
-}
-
 blogRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
   response.json(blogs)
@@ -20,7 +11,7 @@ blogRouter.get('/', async (request, response) => {
 
 blogRouter.post('/', async (request, response) => {
   //TO not destroy the testing trough userId
-  if (!request.body.userId && !request.get('authorization'))
+  if (!request.body.userId && !request.token)
     return response.status(400).json({ error: 'userId is missing or is not valid, token is not present either' })
 
   if (!request.body.likes)
@@ -44,7 +35,7 @@ blogRouter.post('/', async (request, response) => {
     else return response.status(400).json({ error: 'userId is not valid' })
     //TOKEN VALIDATION
   } else {
-      const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
+      const decodedToken = jwt.verify(request.token, process.env.SECRET)
       if (!decodedToken.id) {
         return response.status(401).json({ error: 'token invalid' })
       }
@@ -79,13 +70,21 @@ blogRouter.get('/:id', async (request, response) => {
 
 blogRouter.delete('/:id', async (request, response) => {
   const id = request.params.id
-  try {
+  if(!request.token) return response.status(401).json({ error: 'token missing' })
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' })
+  }
+  const user = await User.findById(decodedToken.id)
+  if(!user) return response.status(400).json({ error: 'UserId missing or not valid' })
+  const blog = await Blog.findById(id)
+  if(decodedToken.id.toString() === blog.user.toString()){    
     await Blog.findByIdAndDelete(id)
-    response.status(204).end()
+    user.blogs.pop(id)
+    await user.save()
+    return response.status(204).end()
   }
-  catch (error) {
-    response.status(400).send({ error: 'malformatted id' })
-  }
+  else return response.status(401).json({ error: `only the creator of the blog can delete it` })
 })
 
 blogRouter.put('/:id', async (request, response) => {

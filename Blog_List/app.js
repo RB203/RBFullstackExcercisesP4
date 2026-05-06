@@ -8,6 +8,7 @@ const blogRouter = require('./controllers/blogs')
 const userRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
 const {unknownEndpoint} = require('./utils/middleware')
+const {tokenExtractor} = require('./utils/tokenMiddleware')
 const mongoose = require('mongoose')
 
 //The url for the database, it is saved in an environment variable
@@ -25,6 +26,7 @@ mongoose.connect(url).then(result => {
 
 app.use(cors())
 app.use(express.json())
+app.use(tokenExtractor)
 app.use('/api/blogs', blogRouter)
 app.use('/api/users', userRouter)
 app.use('/api/login', loginRouter)

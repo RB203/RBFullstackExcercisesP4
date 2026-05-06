@@ -154,6 +154,20 @@ test('only a logged user can add blogs', async () => {
   console.log(post1.body)
 })
 
+test('a blog can be deleted by a logged user', async () => {
+  const trueLogin = await api.post('/api/login').send({ username: 'Solidus', password: 'MGS2SoL' }).expect('Content-Type', /application\/json/).expect(200)
+  const newBlog = {
+    title: "React patterns",
+    author: "Michael Chan",
+    url: "https://reactpatterns.com/",
+    likes: 7,
+  }
+  const post1 = await api.post('/api/blogs').send(newBlog).set('Authorization', `Bearer ${trueLogin.body.token}`).expect(201)
+  const finalResult = await api.delete(`/api/blogs/${post1.body.id}`).set('Authorization', `Bearer ${trueLogin.body.token}`)
+  // .expect(204)
+  console.log(finalResult.body)
+})
+
 after(async () => {
   logger.info('Finished testing, closing connection to database')
   await mongoose.connection.close()
