@@ -6,11 +6,13 @@ const initialUsers = [
     username: "Solidus",
     name: "George Sears",
     password: "MGS2SoL",
+    blogs: [],
   },
   {
     username: "Joker",
     name: "Ren Amamiya",
     password: "SMTP5R",
+    blogs: [],
   }  
 ]
 

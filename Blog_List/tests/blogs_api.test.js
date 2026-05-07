@@ -1,12 +1,16 @@
 const {test,beforeEach,after} = require('node:test')
 const assert = require('node:assert')
 const {initialBlogs,blogsInDb} = require('../utils/blog_helper')
+const {initialUsers,usersInDb} = require('../utils/user_helper')
 const supertest = require('supertest')
 const app = require('../app')
 const config = require('../utils/config')
 const logger = require('../utils/logger')
 const mongoose = require('mongoose')
 const Blog = require('../models/blog')
+const User = require('../models/user')
+const bcrypt = require('bcrypt')
+const saltRounds = 10
 
 const api = supertest(app)
 //THESE TESTS ARE NOT PART OF PART 4 OF SECTION D (ONLY SECTION B)
@@ -16,6 +20,12 @@ beforeEach(async () => {
     let blogObject = new Blog(blog)
     await blogObject.save()
   }
+  await User.deleteMany({})
+  for (let user of initialUsers) {
+    let userObject = new User(user)
+    userObject.password = await bcrypt.hash(userObject.password, saltRounds)
+    await userObject.save()
+  }  
 })
 
 test('blogs are returned as json', async () => {
@@ -36,6 +46,7 @@ test('blogs are returned as json', async () => {
 })
 
 test('a valid blog can be added', async () => {
+  const trueLogin = await api.post('/api/login').send({ username: 'Solidus', password: 'MGS2SoL' }).expect('Content-Type', /application\/json/).expect(200)
   const newBlog = {
     title: "New Blog",
     author: "John Doe",
@@ -44,13 +55,15 @@ test('a valid blog can be added', async () => {
     userId: "testing",
   }
 
-  await api.post('/api/blogs').send(newBlog).expect(201).expect('Content-Type', /application\/json/)
+  await api.post('/api/blogs').send(newBlog).set('Authorization', `Bearer ${trueLogin.body.token}`).expect(201).expect('Content-Type', /application\/json/)
 
   const blogsAfterAdding = await blogsInDb()
   assert.strictEqual(blogsAfterAdding.length, initialBlogs.length + 1)
 })
 
 test('a blog without likes can be added', async () => {
+  const trueLogin = await api.post('/api/login').send({ username: 'Solidus', password: 'MGS2SoL' }).expect('Content-Type', /application\/json/).expect(200)
+
   const newBlog = {
     title: "Super specific blog",
     author: "John Doe",
@@ -58,7 +71,7 @@ test('a blog without likes can be added', async () => {
     userId: "testing",
   }
 
-  await api.post('/api/blogs').send(newBlog).expect(201)
+  await api.post('/api/blogs').send(newBlog).set('Authorization', `Bearer ${trueLogin.body.token}`).expect(201)
 
   const blogsAfterAdding = await blogsInDb()
   console.log(blogsAfterAdding)
@@ -68,19 +81,34 @@ test('a blog without likes can be added', async () => {
 })
 
 test('a blog without title or url cannot be added', async () => {
+  const trueLogin = await api.post('/api/login').send({ username: 'Solidus', password: 'MGS2SoL' }).expect('Content-Type', /application\/json/).expect(200)
+
   const newBlog = {
     title: "Super specific blog",
     author: "John Doe",
     userId: "testing",
   }
 
-  await api.post('/api/blogs').send(newBlog).expect(400)
+  await api.post('/api/blogs').send(newBlog).set('Authorization', `Bearer ${trueLogin.body.token}`).expect(400)
 })
 
+//It is already done in the users_api.test.js
 test('a blog can be deleted', async () => {
-  const blogs = await api.get('/api/blogs').expect(200).expect('Content-Type', /application\/json/)
-  const blogsAfterAdding = blogs.body[0]
-  await api.delete(`/api/blogs/${blogsAfterAdding.id}`).expect(204)
+  // const blogs = await api.get('/api/blogs').expect(200).expect('Content-Type', /application\/json/)
+  // const trueLogin = await api.post('/api/login').send({ username: 'Solidus', password: 'MGS2SoL' }).expect('Content-Type', /application\/json/).expect(200)
+  // const blogsAfterAdding = blogs.body[0]
+  // await api.delete(`/api/blogs/${blogsAfterAdding.id}`).set('Authorization', `Bearer ${trueLogin.body.token}`).expect(204)
+
+  const trueLogin = await api.post('/api/login').send({ username: 'Solidus', password: 'MGS2SoL' }).expect('Content-Type', /application\/json/).expect(200)
+  const newBlog = {
+    title: "React patterns",
+    author: "Michael Chan",
+    url: "https://reactpatterns.com/",
+    likes: 7,
+  }
+  const post1 = await api.post('/api/blogs').send(newBlog).set('Authorization', `Bearer ${trueLogin.body.token}`).expect(201)
+  const finalResult = await api.delete(`/api/blogs/${post1.body.id}`).set('Authorization', `Bearer ${trueLogin.body.token}`).expect(204)
+  console.log(finalResult.body) 
 })
 
 test('a blog can be updated', async () => {
